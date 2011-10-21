@@ -1,0 +1,13 @@
+Ideas
+1. Difference between two human genomes is at max 1%
+2. So, we need to story only the diff.
+3. The diff would contain a lot of zeroes, we can use RLE to compress this.
+4. Later, we can use Huffman encoding for further compression
+5. Huffman encoding would be done on a per chromosome basis, so that we can exploit
+patterns in a diff which are local to a chromosome. Or we can choose a smaller unit
+like Gene or something, do on Huffman on individually.
+
+TODO
+Literature Survey
+I read a report on a Genome Compression project, where they reduced they compressed
+the Genome to 4 MB. They were using Idea 1. I need to look up the exact source.
