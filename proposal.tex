@@ -1,0 +1,56 @@
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{tikz}
+\usepackage{url}
+\usetikzlibrary{shapes}
+
+
+\linespread{1.4}
+
+\title{Genome Compression Against a Reference \\
+        Project Proposal \\}
+
+\author{\\
+        Aniruddha Laud (107635282)\\
+        Gaurav Menghani (108266803)\\
+        Madhava Keralapura (SBU ID Here)\\}
+
+
+\begin{document}
+
+\maketitle
+
+\clearpage
+.
+\clearpage
+
+\tableofcontents
+
+\clearpage
+.
+\clearpage
+
+\section {Introduction}
+The human genome is roughly 3 billion base-pairs long. As we inch closer to realizing the dream of the 1000\$ genome, we must also find an efficient way of storing the immense amount of data in the genome.\\
+\\
+There are 4 different nucleotide bases in a DNA sequence. Using 2 bits/base, we would need ~ 6 billion bits, we would be looking at a file which takes about 715 MiB of space. While this is not an intractable amount of space, it is still not easy to send across data of this size. Ideally, we would like to compress the genome to a point, where we could send it as an email-attachment.\\
+\\
+Therefore, our objective is to device a genome compression algorithm, which can fit the genome, within roughly 10 MiB or so. The biggest aid in doing this is, is the observation that any two human genomes, are same, to a very high degree. It is estimated that the average nucleotide diversity between two human genomes is about 0.1\%, which means, that they differ by roughly 1 base pair every 1000 base pairs.\cite{jorde04}\\
+\\
+Hence, ideally it is possible to keep a reference genome, such as James Watson's genome, and express other genomes by computing its \emph{diff} with Watson's genome. 
+
+\clearpage
+
+\begin{thebibliography}{9}
+
+\bibitem{jorde04}
+  Jorde, Lynn B., Wooding, Stephen P.,
+  \emph{Genetic variation, classification and race}.
+  Nature Genetics 36 (11 Suppl): S28–S33. doi:10.1038/ng1435. PMID 15508000,
+  2004
+
+\end{thebibliography}
+
+\end{document}
