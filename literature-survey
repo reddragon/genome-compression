@@ -1,0 +1,14 @@
+DNA Zip Project
+http://www.ics.uci.edu/~dnazip/
+
+DNA Zip Paper
+http://bioinformatics.oxfordjournals.org/content/25/2/274.full
+
+hg18 - Human Reference Genome
+http://www.ics.uci.edu/~dnazip/chr.tgz
+
+James Watson's DNA sequence - We need to compress this (for benchmarking purposes)
+http://www.ics.uci.edu/~dnazip/JWB.tgz
+
+UCI team - Zips Genome to 4 MB
+http://www.genomeweb.com/informatics/uc-irvine-team-develops-data-compression-method
