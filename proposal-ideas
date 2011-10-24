@@ -1,5 +1,5 @@
 Ideas
-1. Difference between two human genomes is at max 0.1%
+1. Difference between two human genomes is at max 0.1% - (madhava: questionable)
 2. So, we need to store only the diff.
 3. The diff would contain a lot of zeroes, we can use RLE to compress this.
 4. Later, we can use Huffman encoding for further compression
@@ -7,3 +7,9 @@ Ideas
 patterns in a diff which are local to a chromosome. Or we can choose a smaller unit
 like Gene or something, do on Huffman on individually.
 
+
+more:
+6. Use reference genome.
+7. Encode edit distance - is this smaller than compression? what to use as reference  (or where to edit from) (commonly occuring approximate n-letter string patterns)?
+8. SNP reference for more compression - SNPs are common sequences that differ in 1 letter, usually existing in only one of 2 forms.
+9. What variations occur? - SNPs, copy number variations (deletions, inversions, insertions and duplications)
