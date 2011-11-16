@@ -30,34 +30,33 @@
 \tableofcontents
 
 \clearpage
-.
-\clearpage
 
 \section {Introduction}
 
 The human genome is roughly 3 billion base-pairs long. As we inch closer to realizing the dream of the \$1000 genome, we must also find an efficient way of storing the immense amount of data in the genome.\\
 \\
-There are 4 different nucleotide bases in a DNA sequence. Using 2 bits/base, we would need ~ 6 billion bits, we would be looking at a file which takes about 715 MiB of space. While this is not an intractable amount of space, it is still not easy to send across data of this size. Ideally, we would like to compress the genome to a point, where we could send it as an email-attachment.\\
+There are 4 different nucleotide bases in a DNA sequence. Even using 2 bits/base, we would need $\sim$ 6 billion bits, and we would be looking at a file which takes about 715 MiB of space. While this is not an intractable amount of space, it is still not easy to send across data of this size. Ideally, we would like to compress the genome to a point, where we could send it as an email-attachment.\\
 \\
 Therefore, our objective is to device a genome compression algorithm, which can fit the genome, within roughly 10 MiB or so. The biggest aid in doing this is, is the observation that any two human genomes, are same, to a very high degree. It is estimated that the average nucleotide diversity between two human genomes is about 0.1\%, which means, that they differ by roughly 1 base pair every 1000 base pairs.\cite{jorde04}\\
 \\
-Hence, ideally it is possible to keep a reference genome, such as the hg18 genome \cite{ucschg18}, and express other genomes by computing its \emph{diff} with the hg18 genome. 
-\clearpage
+Hence, ideally it is possible to keep a reference genome, such as the hg18 genome \cite{ucschg18}, and express other genomes by computing its \emph{diff} with the hg18 genome. \\
 
 \section {Current Work}
-The idea of compressing a genome is not new. There have been a couple of projects that have tried to do this in the recent past. The DNAzip project \cite{dnazip} from University of California - Irvine aims at compressing James D. Watson's genome down to about 4 Megabytes. Their goal was to enable people to be able to email their genome as an attachment. However, they need a big SNP database along with the large reference genome. 
+The idea of compressing a genome is not new. There have been a couple of projects that have tried to do this in the recent past. The DNAzip project \cite{dnazip, dnazip_paper} from University of California - Irvine aims at compressing James D. Watson's genome down to about 4 Megabytes. Their goal was to enable people to be able to email their genome as an attachment. However, they need a big SNP database along with the large reference genome. 
 
-Apart from DNAzip, there is GenCompress which is a lossless compression algorithm for genetic sequences. It uses approximate repeats as a basis for compressing the genome. This is an active area of research and various different approaches need to be explored.
+Apart from DNAzip, there is GenCompress \cite{gencompress} which is a lossless compression algorithm for genetic sequences. It uses approximate repeats as a basis for compressing the genome. This is an active area of research and various different approaches need to be explored.\\
 
 \section {Applicability}
-The information about every individual is stored in his/her DNA. With projects like the \$1000 genome project, the likelihood of every individual on this planet getting his genome sequenced is increasing. Genome sequencing will have a huge impact in the healthcare business as well. A lot of diseases such as asthama, diabetes, cancer etc. are believed to have a genetic cause. Apart from these, there are a number of known genetic disorders which affect a lot of people. With your genome sequenced, it would be easy to just figure out what mutations occurs and know what diseases you might fall prey to. Genome compression will play a huge part in these areas. Two human genomes usually have a difference in about 0.1\% bases. This difference is pretty small compared to the actual size of the human genome, which is about 3 billion bases. If we were to store the human genome on a computer, it would take up close to 1.8GB of space. If we store only the differences, it comes down to about 3MB. If both parties have the reference genome on which the "diff" was done, they can just communicate the difference, rather than the whole genome. Imagine carrying your genome on a thumb drive or in your cellphone and transferring it to your doctor's PDA or computer in a few seconds. Or imagine a web portal where you could upload your genome "diff" and quickly get information about your geneology or family history. Such things can only be made possible by compressing the genome to an order of a few Megabytes compared to the Gigabytes needed to store it presently.  
+The information about every individual is stored in his/her DNA. With projects like the \$1000 genome project, the likelihood of every individual on this planet getting his genome sequenced is increasing. Genome sequencing will have a huge impact in the healthcare business as well. A lot of diseases such as asthma, diabetes, cancer etc. are believed to have a genetic cause. Apart from these, there are a number of known genetic disorders which affect a lot of people. With your genome sequenced, it would be easy to just figure out what mutations occurs and know what diseases you might fall prey to. 
+
+Genome compression will play a huge part in these areas. Two human genomes usually have a difference in about 0.1\% bases. This difference is pretty small compared to the actual size of the human genome, which is about 3 billion bases. If we were to store the human genome on a computer, it would take up close to 1.8GB of space. If we store only the differences, it comes down to about 3MB. If both parties have the reference genome on which the ``diff" was done, they can just communicate the difference, rather than the whole genome. Imagine carrying your genome on a thumb drive or in your cellphone and transferring it to your doctor's PDA or computer in a few seconds. Or imagine a web portal where you could upload your genome ``diff" and quickly get information about your geneology or family history. Such things can only be made possible by compressing the genome to an order of a few Megabytes compared to the Gigabytes needed to store it presently.  
 
 \clearpage
 
 \section{Plan}
 
 \subsection{Data}
-There are several sources of data that we can use. The James Watson genome is used as the standard benchmark for various genome compression algorithms. James Watson's genome is freely available on line \cite{jwseq}. For the reference genome, the UCSC Genome Bioinformatics site \cite{ucschg}, contains hg19, a "finished" human reference genome as well as various annotations, SNP masked files and alignments with various other species that could be of use. Our aim is to use hg19, as well as the various annotations and references provided, to compress the James Watson genome, as well as test our algorithm on some other complete genomes. \\
+There are several sources of data that we can use. The James Watson genome is used as the standard benchmark for various genome compression algorithms. James Watson's genome is freely available on line \cite{jwseq}. For the reference genome, the UCSC Genome Bioinformatics site \cite{ucschg}, contains hg19, a ``finished" human reference genome as well as various annotations, SNP masked files and alignments with various other species that could be of use. Our aim is to use hg19, as well as the various annotations and references provided, to compress the James Watson genome, as well as test our algorithm on some other complete genomes. \\
 
 Complete Genomics \cite{completegenomics} provides several full sequenced genomes with high coverage that we could use. The data from the UCSC site is provided in the standard 2-bit format, the smallest possible format with no kind of encoding where every base is represented by 2 bits. However, most of the other data, including the James Watson sequence and the data from Complete Genomics needs to be converted into this format. We aim to convert to the 2-bit format because it appears by far the easiest to work with. The main other piece of data we would probably require is the SNP database, the use of which we've seen in our literature survey. This is also available in the UCSC site.
 
@@ -67,13 +66,13 @@ There are a couple of methods we're planning to explore:
 - Compression of the genome as a stand-alone sequence. How much can the genome be compressed without using any reference? The repetitive properties of DNA - SNPs, tandem repeats, interspersed repeats and the possible differences - copy number variations and such variations can be effectively used to compress the literal text sequence to a large extent without any reference.\\
 - Compression against a reference. The human reference genome contains genetic material sampled from a number of individuals. Several estimates show that the similarity between the DNA sequences of two individuals is around 99.5\%, which means that only around 0.5\% of the DNA sequence varies between two individuals. It should be possible to achieve a high degree of compression by storing only the difference of the specific DNA sequence against the reference genome. We also know that many of these differences are also described as small, specific variations in known sequences (SNPs, inversions, for instance). Encoding these differences effectively would lead to a high degree of compression as well.
 
-In the end, our method would most likely take parts from both these approaches as required. Identifying repetitive patterns and which specific portions of the DNA tend to differ would be an important step towards the goal. Existing approaches (DNA Zip project) have been able to compress James Watson's DNA to around 4MB (roughly 0.5\% of the 2-bit representation of a 3 billion base-pair genome). This is probably somewhere around the lower limit of the compression that can be achieved.
+In the end, our method would most likely take parts from both these approaches as required. Identifying repetitive patterns and which specific portions of the DNA tend to differ would be an important step towards the goal. Existing approaches (DNA Zip project) \cite{dnazip,dnazip_paper} have been able to compress James Watson's DNA to around 4MB (roughly 0.5\% of the 2-bit representation of a 3 billion base-pair genome). This is probably somewhere around the lower limit of the compression that can be achieved.
 \clearpage
 
 \section{Roadmap for the Project}
 
 \subsection{Literature Survey}
-There has been substantial research on the topic of Genome Compression. Some notable ones are the \cite{jorde04,dnazip} (TODO: Cite Cite Cite). We are currently in this phase, where we are surveying the material in public domain for this purpose. 
+There has been substantial research on the topic of Genome Compression. Some notable ones are the \cite{jorde04,dnazip,dnazip_paper, gencompress}. We are currently in this phase, where we are surveying the material in public domain for this purpose. 
 
 \subsection{Finalizing the Compression Scheme}
 As discussed earlier, we are evaluating compression methods used in previous projects, and brainstorming over the efficacy of our own algorithms for the same. The next phase would be to discuss and select the algorithm that we would be using.
@@ -92,7 +91,7 @@ The algorithm would involve techniques like Huffman and Run-Length Encoding, whi
 \begin{thebibliography}{}
 
 \bibitem{jorde04}
-  Jorde, Lynn B., Wooding, Stephen P.,
+  Jorde, Lynn B. and Wooding, Stephen P.,
   \emph{Genetic variation, classification and race}.
   Nature Genetics 36 (11 Suppl): S28–S33. doi:10.1038/ng1435. PMID 15508000,
   2004
@@ -106,15 +105,23 @@ The algorithm would involve techniques like Huffman and Run-Length Encoding, whi
   http://hgdownload.cse.ucsc.edu/goldenPath/hg18/chromosomes/
 
 \bibitem{dnazip}
-  DNA Zip
-  Put data here.
+  The DNA Zip Project
+  http://www.ics.uci.edu/~dnazip/
 
+\bibitem{dnazip_paper}
+  Christley, Scott and Lu, Yiming and Li, Chen and Xie, Xiaohui,
+  \emph{Human genomes as email attachments}.
+
+\bibitem{gencompress}
+  Chen, Xi and Kwong, Sam and Li, Ming,
+  \emph{A Compression Algorithm for DNA Sequences and Its Applications in Genome Comparison}
+ 
 \bibitem{jwseq}
   James Watson's Sequence
   http://jimwatsonsequence.cshl.edu/cgi-perl/gbrowse/jwsequence/
 
 \bibitem{completegenomics}
-  TODO
+  Complete Genomics
   http://www.completegenomics.com/ 
 \end{thebibliography}
 
