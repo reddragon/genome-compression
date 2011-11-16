@@ -15,7 +15,7 @@
 #include "huffman.h"
 #include "fileGenerator.h"
 #include <cstring>
-#include "bithuffman.h"
+//#include "bithuffman.h"
 
 using namespace std;
 

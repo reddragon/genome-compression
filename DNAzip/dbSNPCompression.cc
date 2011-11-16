@@ -1,5 +1,153 @@
 #include "dbSNPCompression.h"
 
+vector<bool> getVecBool(int n, int min_len = 0)
+{
+	vector<bool> res;
+	do
+	{
+		res.push_back(n%2);
+		n/=2;
+	} while(n);
+
+	while(res.size() < min_len)
+		res.push_back(0);
+	reverse(res.begin(), res.end());
+	return res;
+}
+
+void prependVec(vector<bool> & dest, vector<bool> src)
+{
+	dest.insert(dest.begin(), src.begin(), src.end());
+}
+
+void appendVec(vector<bool> & dest, vector<bool> src)
+{
+	dest.insert(dest.end(), src.begin(), src.end());
+}
+
+
+
+int toNum(vector<bool> vec)
+{
+	int num = 0, f = 1;
+	for(int i = vec.size()-1; i >= 0; i--)
+	{
+		if(vec[i])
+			num += f;
+		f <<= 1;
+	}
+	return num;
+}
+
+void printVec(vector<bool> vec, bool new_line = 0)
+{
+	for(int i = 0; i < vec.size(); i++)
+		cout << vec[i];
+	if(new_line)
+		cout << endl;
+}
+
+vector<bool> fetchVec(vector<bool> & dest, int len)
+{
+	vector<bool> ans = vector<bool>(dest.begin(), dest.begin() + len);
+	dest.erase(dest.begin(), dest.begin() + len);
+	return ans;
+}
+
+void decode(vector<bool> & encoded_str, vector<bool> & decoded_str, map< vector<bool>, vector<bool> > encoding)
+{
+	vector<bool> temp;
+
+	int c = 0;
+
+	for(int i = 0; i < encoded_str.size(); i++)
+	{
+		temp.push_back(encoded_str[i]);
+		if(encoding.find(temp) != encoding.end())
+		{
+			appendVec(decoded_str, encoding[temp]);
+			temp.clear();
+			continue;
+		}
+	}
+	if(temp.size() != 0)
+		appendVec(decoded_str, encoding[temp]);
+}
+
+void huffmanEncode(vector<bool> & bits, vector<bool> & encoded_str, int kmer_len = 5)
+{
+	vector< vector<bool> > kmer_strs;
+	vector<bool> kmer;
+	map< vector<bool>, int> counts;
+	
+	for(int i = 0; i < bits.size(); i++)
+	{
+		if(i && (i % kmer_len == 0)) 
+		{ 
+			kmer_strs.push_back(kmer); 
+			counts[kmer] += 1; 
+			kmer.clear(); 
+		} 
+		kmer.push_back(bits[i]);
+	}
+
+	if(kmer.size() != 0) 
+	{ 
+		while(kmer.size() != kmer_len) 
+			kmer.push_back(0);
+		kmer_strs.push_back(kmer);
+		counts[kmer] += 1; 
+		kmer.clear();
+	}
+	Hufftree<vector<bool>, int> hufftree(counts.begin(), counts.end());
+
+	encoded_str = hufftree.encode(kmer_strs.begin(), kmer_strs.end());
+	vector<bool> dict;
+
+	for(int i = 0; i < (1<<kmer_len); i++)
+	{
+		vector<bool> vec = getVecBool(i, kmer_len);
+		if(counts.find(vec) == counts.end())
+		{
+			appendVec(dict, getVecBool(0,4));			
+		}
+		else
+		{
+			vector<bool> enc_vec = hufftree.encode(getVecBool(i,kmer_len));
+			appendVec(dict, getVecBool(enc_vec.size(), 4));
+			appendVec(dict, enc_vec);
+		}
+	}
+	
+	// Sanity check for the dict	
+	vector< bool > c_dict = dict;
+	
+	for(int i = 0; i < (1<<kmer_len); i++)
+	{
+		vector<bool> vec = getVecBool(i,kmer_len);
+		int len = toNum(fetchVec(c_dict, 4));
+		
+			
+		if(len == 0)
+		{
+			assert(counts.find(vec) == counts.end());
+			continue;
+		}
+		vector<bool> rep = fetchVec(c_dict, len);
+		//encoding[rep] = vec;
+		assert(hufftree.encode(vec) == rep); 
+	}  
+	
+	//cout << "dict is sane" << endl;
+	// Prepending the number of padding we have done
+	prependVec(encoded_str, getVecBool((kmer_strs.size() * kmer_len) - bits.size(), 3));
+	//cout << "Padding: " << (kmer_strs.size() * kmer_len) - bits.size() << endl;
+	vector<bool> dict_sz = getVecBool(dict.size(), 10);
+	prependVec(encoded_str, dict);
+	prependVec(encoded_str, dict_sz);
+}
+
+
 dbSNPCompression::dbSNPCompression( const string& inFreqFile, 
 		const string& dbSNPDir, 
 		unsigned kMer ): dbSNPDir(dbSNPDir), kMer(kMer)
@@ -125,6 +273,25 @@ void dbSNPCompression::compressSNPs(
 					writeString( destBf, prevChrID);
 					//operation type
 					writeBitVINT( destBf, SNP );
+					
+					/* Code to compress the BitMap Starts */
+		
+		            vector<bool> bm;
+		            for(int i = 0; i < bitCnt; i++)
+			            bm.push_back(bitMap[i]);
+		
+            		vector<bool> compressed_bm;
+            		huffmanEncode(bm, compressed_bm);
+		
+            		cout << "Compressed from " << bitCnt << " to " << compressed_bm.size() << endl;
+		
+            		for(int i = 0; i < compressed_bm.size(); i++)
+        			bitMap[i] = compressed_bm[i];
+		
+            		bitCnt = compressed_bm.size();
+		
+            		/* Code to compress the BitMap Ends */
+					
 					//size of bitmap
 					writeBitVINT( destBf, bitCnt );
 					//bitMap
@@ -158,6 +325,7 @@ void dbSNPCompression::compressSNPs(
 					gens->clear();
 					refPosGen->clear();
 					altPosGen->clear();
+
 				}
 				
 				prevChrID = newChrID;
@@ -235,6 +403,25 @@ void dbSNPCompression::compressSNPs(
 		writeString( destBf, prevChrID);
 		//operation type
 		writeBitVINT( destBf, SNP );
+		
+		/* Code to compress the BitMap Starts */
+		
+		vector<bool> bm;
+		for(int i = 0; i < bitCnt; i++)
+			bm.push_back(bitMap[i]);
+		
+		vector<bool> compressed_bm;
+		huffmanEncode(bm, compressed_bm);
+		
+		cout << "Compressed from " << bitCnt << " to " << compressed_bm.size() << endl;
+		
+		for(int i = 0; i < compressed_bm.size(); i++)
+			bitMap[i] = compressed_bm[i];
+		
+		bitCnt = compressed_bm.size();
+		
+		/* Code to compress the BitMap Ends */
+		
 		//size of bitmap
 		writeBitVINT( destBf, bitCnt );
 		//bitMap

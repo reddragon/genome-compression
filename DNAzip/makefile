@@ -24,9 +24,9 @@ huffman.o: huffman.h
 
 bitfile.o: bitfile.h
 
-bithuffman.o: bithuffman.h
-
 perftest.o: input.h output.h dbSNPCompression.h dbSNPDeCompression.h watsonFileGenerator.h kMerFreqGenerator.h 
+
+bithuffman.o: bithuffman.h
 
 perftest: perftest.o bitfile.o bithuffman.o huffman.o input.o output.o dbSNPCompression.o dbSNPDeCompression.o kMerFreqGenerator.o watsonFileGenerator.o
 

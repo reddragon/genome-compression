@@ -131,19 +131,7 @@ void huffmanEncode(vector<bool> & bits, vector<bool> & encoded_str, int kmer_len
 		kmer.clear();
 	}
 	Hufftree<vector<bool>, int> hufftree(counts.begin(), counts.end());
-	/*
-	for(map< vector<bool> ,int>::iterator it = counts.begin(); it != counts.end(); it++)
-	{
-		for(int i = 0; i < (it->first).size(); i++)
-			cout << (it->first[i]);
-		cout << " " << (it->second) << " ";
-		vector< bool > enc = hufftree.encode(it->first);
-		for(int i = 0; i < enc.size(); i++)
-			cout << enc[i];
-		cout << " " << enc.size() << endl;
-		//assert(enc.size() <= 10 && enc != all_ones);
-	} */
-	
+
 	encoded_str = hufftree.encode(kmer_strs.begin(), kmer_strs.end());
 	vector<bool> dict;
 

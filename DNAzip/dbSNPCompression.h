@@ -7,6 +7,7 @@
 #include <map>
 #include <algorithm>
 #include <vector>
+#include <cassert>
 #include "stdlib.h"
 #include "bitfile.h"
 #include "output.h"
