@@ -8,7 +8,6 @@
 #include "watsonFileGenerator.h"
 #include "kMerFreqGenerator.h"
 
-
 void testKMerFreq( int freq, const string& originalFile, const string& destionationFile )
 {
 	kMerFreqGenerator gen( freq, originalFile, destionationFile );
