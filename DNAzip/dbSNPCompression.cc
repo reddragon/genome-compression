@@ -74,7 +74,7 @@ void decode(vector<bool> & encoded_str, vector<bool> & decoded_str, map< vector<
 		appendVec(decoded_str, encoding[temp]);
 }
 
-void huffmanEncode(vector<bool> & bits, vector<bool> & encoded_str, int kmer_len = 5)
+void huffmanEncode(vector<bool> & bits, vector<bool> & encoded_str, int kmer_len = 6)
 {
 	vector< vector<bool> > kmer_strs;
 	vector<bool> kmer;
@@ -411,7 +411,7 @@ void dbSNPCompression::compressSNPs(
 			bm.push_back(bitMap[i]);
 		
 		vector<bool> compressed_bm;
-		huffmanEncode(bm, compressed_bm);
+		huffmanEncode(bm, compressed_bm, 5);
 		
 		cout << "Compressed from " << bitCnt << " to " << compressed_bm.size() << endl;
 		

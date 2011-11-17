@@ -1,0 +1,79 @@
+Project Outline
+- What we are going to do?
+    Genomes are usually distributed majorly in two formats. First, it is in the FASTA format. Secondly, and more
+    commonly as two files, one containing the SNPs (Single Nucleotide Polymorphisms), and the other containing
+    insertions and deletions, both with respect to a reference genome (usually hg18). 
+
+    While the size of a pure FASTA-based genome is about 3 GB, using the second format as mentioned above, James
+    Watson's genome was expressed in about 1.8 GB, with reference to the hg18 genome. 
+
+    The DNAZip makes use of the database of all SNPs reported (dbSNP) and the hg18 genome to represent this information
+    cleverly in about 4.1 MB. We intend to represent this information in an even more efficient format, and reduce the
+    size of the genome further, without using any extra information.
+
+Present Work
+    - DNA Zip Detail
+        <TODO> Put it here.
+
+Work Done
+    - Studying the DNAZip Code Base
+        <TODO> Put it here.
+
+    - Storing Bit Vectors efficiently
+        As explained above, DNAZip creates a bitmap from the dbSNP. If bit i is set in the bitmap, it implies that the
+        ith SNP from the dbSNP occurs in the actual genome. The DNAZip project simply stores this sparse bitmap for each
+        chromosome. Upon analysis, we found that these bitmaps compose of about 1.2 MB of the total 4.1 MB of the genome.
+        
+        This sparseness of the bitmap made a strong case for compressing it.
+
+   - Experiments Done
+        1 Runs of zeroes
+          Our first intuition was to use Run-Length Encoding for storing the bitvectors in an efficient fashion. 
+          We expected very long runs of zeroes. However, on actual analysis, we found the following results:
+          
+          <Chart / Data Insert here>
+          So, the average runs of zeroes was about 5. This made the case for using Huffman-coding instead of
+          Run-Length coding.
+        
+        2 Compression received with different kmer-sizes
+          We extracted the bit-vectors beng stored in the genome file for testing our Huffman coding implementation.
+          Now, we wanted to test the compression received with varying the size of the k-mers we were considering. 
+          As expected, we found a bell-curve in the compression ratio chart. The peak occurs between 5 and 6. 
+          
+          <Chart / Data Insert here>
+          Thus, the choice of the k-mer length can be either 5 or 6. We decide on that later.
+          
+        3 Local v/s Global Huffman Tree
+          There were two approaches of doing the Huffman-Encoding. First, we take each chromosome, construct the Huffman
+          tree based upon the frequencies of the k-mers in that particular chromosome. The second approach is to go
+          through all the chromosomes, and use the cumulative frequencies over all chromosomes of each k-mer, to generate
+          the Huffman-tree.
+          
+          While intuitively, we expect the the Locally created Huffman Tree to give better compression, than the
+          Globally created Huffman Tree. This is overshadowed by the cost of storing a dictionary for each chromosome
+          in the local case v/s the cost of storing only one dictionary in the global case.
+          
+          <Chart / Data Insert here> 
+        
+        4 Practical Compression Received
+          As we found in experiment 2, the choice for the size of the k-mers was between 5 and 6. We tried compressing
+          the bit-vectors using both sizes.
+          
+          Compressing the bit-vectors using k-mers of size 5 resulted in the genome being of size 3896467 bytes. 
+          While using k-mers of size 6 resulted in the genome being of size 3889100 bytes. This is against the original
+          file of size 4198717 bytes. Thus, using k-mers of size 6, we decreased the size of the genome by 302.36 KB,
+          which is 7.37%.
+          
+          We endeavor to bring to fit the genome in 3 MB or less.
+
+Further Work
+    Now that we have studied the DNAZip code base.
+    - Storing Non-DBSNPs Efficiently
+    - Storing INDELs efficiently
+    - Modifying the VINT storage
+    - Further analysing the SNPs, INDELs, to find scope for future improvement.
+    - (CONFIRM) Analysing the difference made my switching to 3-mers, 5-mers, 6-mers and so on.
+    
+References
+    [1] DNA Zip Project http://www.ics.uci.edu/~dnazip/
+    [2] DNA Zip Paper
