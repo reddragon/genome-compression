@@ -1,0 +1,13 @@
+The following techniques are used by DNAzip to achieve compression.
+
+1. Variable size integer representation and delta positions
+
+In the variation data, all the variation (indels and SNPs) are expressed as position on the reference genome, plus the variation actually present. The position is expressed as an offset from the beginning of the sequence. Thus, the size required to store the position increases while storing variations at the end of the genome. Instead of storing the entire offset, it is sufficient to store just the delta from the previous variation. One problem with this is that an integer value takes the same amount of space to store, regardless of the value within it. Thus, by implementing a mechanism to store exactly as many bits are required, storage utilized could be optimized. A variable integer as implemented by DNAzip uses 7 of 8 bits in a character to store the bits of the integer, and 1 bit to indicate whether an integer ends at that byte or not.
+
+2. SNP mapping
+
+Most of the variation between genomes are generally substitutions usually referred to as single nucleotide polymorphisms (SNPs). Most of these substitutions exist in one of two possible alternatives (bi-allele). Most of these SNPs are collected and organized by NCBI in what is known as dbSNP. dbSNP contains all known SNPs organized by position against the human reference genome (hg18, for instance). Though dbSNP records variations other than just the SNPs (it also records indels and multi-allele SNPs), DNAzip just considers the bi-allele SNPs. DNAzip stores the SNPs as a bit vector of all possible SNPs, with 1 where the SNP exists and 0 where the SNP doesn't. For those SNPs that are not present in dbSNP, they are stored as position along with the actual substitution.
+
+3. K-mer partitioning
+
+A common compression technique used is Huffman coding. By partitioning all the insertion data into K-mers and inserting them into a Huffman tree, the optimal representation of each k-mer can be obtain, and this representation is then stored, thus achieving some level of compression.
