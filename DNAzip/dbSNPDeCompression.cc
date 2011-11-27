@@ -1,5 +1,109 @@
 #include "dbSNPDeCompression.h"
 
+vector<bool> _getVecBool(int n, int min_len = 0)
+{
+	vector<bool> res;
+	do
+	{
+		res.push_back(n%2);
+		n/=2;
+	} while(n);
+
+	while(res.size() < min_len)
+		res.push_back(0);
+	reverse(res.begin(), res.end());
+	return res;
+}
+
+void _prependVec(vector<bool> & dest, vector<bool> src)
+{
+	dest.insert(dest.begin(), src.begin(), src.end());
+}
+
+void _appendVec(vector<bool> & dest, vector<bool> src)
+{
+	dest.insert(dest.end(), src.begin(), src.end());
+}
+
+
+
+int _toNum(vector<bool> vec)
+{
+	int num = 0, f = 1;
+	for(int i = vec.size()-1; i >= 0; i--)
+	{
+		if(vec[i])
+			num += f;
+		f <<= 1;
+	}
+	return num;
+}
+
+void _printVec(vector<bool> vec, bool new_line = 0)
+{
+	for(int i = 0; i < vec.size(); i++)
+		cout << vec[i];
+	if(new_line)
+		cout << endl;
+}
+
+vector<bool> _fetchVec(vector<bool> & dest, int len)
+{
+	vector<bool> ans = vector<bool>(dest.begin(), dest.begin() + len);
+	dest.erase(dest.begin(), dest.begin() + len);
+	return ans;
+}
+
+void _decode(vector<bool> & encoded_str, vector<bool> & decoded_str, map< vector<bool>, vector<bool> > encoding)
+{
+	vector<bool> temp;
+
+	int c = 0;
+
+	for(int i = 0; i < encoded_str.size(); i++)
+	{
+		temp.push_back(encoded_str[i]);
+		if(encoding.find(temp) != encoding.end())
+		{
+			_appendVec(decoded_str, encoding[temp]);
+			temp.clear();
+			continue;
+		}
+	}
+	if(temp.size() != 0)
+		_appendVec(decoded_str, encoding[temp]);
+}
+
+void huffmanDecode(vector<bool> &encoded_str, vector<bool> &decoded_str, int kmer_len = 6)
+{
+	//cout << "Decompression begins" << endl;
+	int dict_size = _toNum(_fetchVec(encoded_str, 10));
+	//cout << "Dict Size: " << dict_size << endl;
+	vector<bool> new_dict = _fetchVec(encoded_str, dict_size);
+	
+	map< vector<bool>, vector<bool> > encoding;
+	for(int i = 0; i < (1<<kmer_len); i++)
+	{
+		vector<bool> vec = _getVecBool(i,kmer_len);
+		int len = _toNum(_fetchVec(new_dict, 4));
+			
+		vector<bool> rep = _fetchVec(new_dict, len);
+		encoding[rep] = vec;
+	}  
+
+	int bits_padding = _toNum(_fetchVec(encoded_str, 3));
+	//cout << "Padding: " << bits_padding << endl;
+
+	
+	_decode(encoded_str, decoded_str, encoding);
+	//printVec(decoded_string,1);
+	decoded_str.erase(decoded_str.end() - bits_padding, decoded_str.end());
+	
+	//cout << decoded_str.size() << endl;
+}
+
+
+
 dbSNPDeCompression::dbSNPDeCompression( const string& inFreqFile, 
 		const string& dbSNPDir, 
 		const string& dataDir, 
@@ -44,8 +148,25 @@ void dbSNPDeCompression::deCompressSNPs( bit_file_c& srcBf,
 		
 		unsigned bitMapSz = readBitVINT( srcBf );
 		bool* bitMap = new bool[bitMapSz];
-		readBitArrays( srcBf, bitMap, bitMapSz );								
-					
+		readBitArrays( srcBf, bitMap, bitMapSz );
+		
+		/* Decoding the Huffman Encoding of the Bitvector */
+		vector<bool> encoded_str;
+		for(int i = 0; i < bitMapSz; i++)
+			encoded_str.push_back(bitMap[i]);
+		
+		vector<bool> decoded_str;
+		huffmanDecode(encoded_str, decoded_str);
+		cout << "Decoded " << bitMapSz << " to " << decoded_str.size() << endl;
+		
+		delete bitMap;
+		bitMapSz = decoded_str.size();
+		bitMap = new bool[bitMapSz];
+		for(int i = 0; i < bitMapSz; i++)
+			bitMap[i] = decoded_str[i];
+		
+		/* Decoding ends */	
+				
 		string dbSNPLine;
 		ifstream dbSNPStream( (dbSNPDir+chromosomeID+".txt").c_str() );
 		getline( dbSNPStream, dbSNPLine ); //schema of dbSNP

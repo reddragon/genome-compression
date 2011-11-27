@@ -280,18 +280,18 @@ void dbSNPCompression::compressSNPs(
 		            for(int i = 0; i < bitCnt; i++)
 			            bm.push_back(bitMap[i]);
 		
-            		vector<bool> compressed_bm;
+         		   	vector<bool> compressed_bm;
             		huffmanEncode(bm, compressed_bm);
 		
             		cout << "Compressed from " << bitCnt << " to " << compressed_bm.size() << endl;
 		
             		for(int i = 0; i < compressed_bm.size(); i++)
-        			bitMap[i] = compressed_bm[i];
+        				bitMap[i] = compressed_bm[i];
 		
             		bitCnt = compressed_bm.size();
-		
+			
             		/* Code to compress the BitMap Ends */
-					
+						
 					//size of bitmap
 					writeBitVINT( destBf, bitCnt );
 					//bitMap
@@ -411,7 +411,7 @@ void dbSNPCompression::compressSNPs(
 			bm.push_back(bitMap[i]);
 		
 		vector<bool> compressed_bm;
-		huffmanEncode(bm, compressed_bm, 5);
+		huffmanEncode(bm, compressed_bm, 6);
 		
 		cout << "Compressed from " << bitCnt << " to " << compressed_bm.size() << endl;
 		
