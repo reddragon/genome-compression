@@ -13,7 +13,7 @@ void writeBitArrays( bit_file_c& bf, bool* bits, unsigned cnt );
 //write a vector of gene letters
 void writeBitGens( bit_file_c& bf, vector<char> * gens );
 //write a VINT 
-void writeBitVINT( bit_file_c& bf, unsigned num );
+void writeBitVINT( bit_file_c& bf, unsigned num);
 //write a string
 void writeString( bit_file_c& bf, string& str );
 

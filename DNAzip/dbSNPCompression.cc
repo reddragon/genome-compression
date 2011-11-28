@@ -628,10 +628,13 @@ void dbSNPCompression::compressDELs(
 			{				
 				//chromsome ID
 				writeString( destBf, prevChrID );
+				//cout << prevChrId << endl;
 				//operation type
 				writeBitVINT( destBf, DELETION );
+				//cout << DELETION << endl;
 				//size of positions
 				writeBitVINT( destBf, positions->size() );
+				//cout << positions->size() << endl;
 				//positions
 				vector<unsigned>::iterator posIter = positions->begin();
 				unsigned prevPos = 0;
@@ -660,6 +663,7 @@ void dbSNPCompression::compressDELs(
 			oldPos = 0;						
 		}
 		
+		//cout << newPos << " " << genToken << endl;
 		if( newPos > oldPos )
 		{
 			unsigned genLen = genToken.length()/2; //genLength					

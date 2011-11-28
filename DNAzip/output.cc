@@ -68,10 +68,39 @@ void writeBitGens( bit_file_c& bf, vector<char> * gens )
 }
 
 //write a VINT 
+void writeBitVINT( bit_file_c& bf, unsigned num)
+{
+	int word_length = 5;
+	vector<bool> * bits = new vector<bool> ();
+	char mask = (1 << (word_length - 1)) - 1;
+	do
+	{
+		if(num > mask) bits->push_back(1);
+		else bits->push_back(0);
+		
+		char word = num & mask;
+		//cout << (int)word << endl;
+		
+		for(int i = (word_length - 2); i >= 0; i--)
+			bits->push_back((word & (1<<i)));
+		
+		num >>= (word_length - 1);
+	} while(num);
+	
+	
+	writeBits( bf, bits );
+	//cerr << x << endl;
+	//cout << num << " " << c << endl;
+	delete bits;	
+}
+
+
+/* 
 void writeBitVINT( bit_file_c& bf, unsigned num )
 {
 	vector<bool>* bits = new vector<bool>();
-	int mask;
+	int mask, c = 0;
+	unsigned x = num;
 	char chrByte;
 	while ( num >= 128 ) {
 		 chrByte = (char)((num & 0x7f) | 0x80);		     
@@ -85,6 +114,7 @@ void writeBitVINT( bit_file_c& bf, unsigned num )
 		     mask >>= 1;
 		  }		     
 		  num >>= 7;
+		  //c++;
 	}
 	
 	chrByte = (char)num;
@@ -96,11 +126,15 @@ void writeBitVINT( bit_file_c& bf, unsigned num )
 		else
 		   bits->push_back( false );
 		mask >>= 1;
+		
 	}
 	
 	writeBits( bf, bits );
+	cerr << x << endl;
+	//cout << num << " " << c << endl;
 	delete bits;	
-}
+}*/
+
 //write a string
 void writeString( bit_file_c& bf, string& str )
 {
