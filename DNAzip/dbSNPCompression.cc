@@ -157,7 +157,7 @@ dbSNPCompression::dbSNPCompression( const string& inFreqFile,
 	bit_file_c bf; 
 	bf.Open( inFreqFile.c_str(), BF_READ );
 	
-	unsigned num = readBitVINT( bf );  	
+	unsigned num = readBitVINT( bf );
 	for( unsigned i = 0; i < num; i++ )
 	{
 		string gens = readString( bf );
@@ -283,7 +283,7 @@ void dbSNPCompression::compressSNPs(
          		   	vector<bool> compressed_bm;
             		huffmanEncode(bm, compressed_bm);
 		
-            		cout << "Compressed from " << bitCnt << " to " << compressed_bm.size() << endl;
+            		cout << "BitVector Compressed from " << bitCnt << " to " << compressed_bm.size() << endl;
 		
             		for(int i = 0; i < compressed_bm.size(); i++)
         				bitMap[i] = compressed_bm[i];

@@ -157,7 +157,7 @@ void dbSNPDeCompression::deCompressSNPs( bit_file_c& srcBf,
 		
 		vector<bool> decoded_str;
 		huffmanDecode(encoded_str, decoded_str);
-		cout << "Decoded " << bitMapSz << " to " << decoded_str.size() << endl;
+		cout << "Decoded BitVector From " << bitMapSz << " to " << decoded_str.size() << endl;
 		
 		delete bitMap;
 		bitMapSz = decoded_str.size();

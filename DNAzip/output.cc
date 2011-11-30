@@ -89,7 +89,6 @@ void writeBitVINT( bit_file_c& bf, unsigned num)
 	
 	
 	writeBits( bf, bits );
-	//cerr << x << endl;
 	//cout << num << " " << c << endl;
 	delete bits;	
 }
