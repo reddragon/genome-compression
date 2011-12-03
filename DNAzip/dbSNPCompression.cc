@@ -157,7 +157,7 @@ dbSNPCompression::dbSNPCompression( const string& inFreqFile,
 	bit_file_c bf; 
 	bf.Open( inFreqFile.c_str(), BF_READ );
 	
-	unsigned num = readBitVINT( bf );  	
+	unsigned num = readBitVINT( bf );
 	for( unsigned i = 0; i < num; i++ )
 	{
 		string gens = readString( bf );
@@ -280,18 +280,18 @@ void dbSNPCompression::compressSNPs(
 		            for(int i = 0; i < bitCnt; i++)
 			            bm.push_back(bitMap[i]);
 		
-            		vector<bool> compressed_bm;
+         		   	vector<bool> compressed_bm;
             		huffmanEncode(bm, compressed_bm);
 		
-            		cout << "Compressed from " << bitCnt << " to " << compressed_bm.size() << endl;
+            		cout << "BitVector Compressed from " << bitCnt << " to " << compressed_bm.size() << endl;
 		
             		for(int i = 0; i < compressed_bm.size(); i++)
-        			bitMap[i] = compressed_bm[i];
+        				bitMap[i] = compressed_bm[i];
 		
             		bitCnt = compressed_bm.size();
-		
+			
             		/* Code to compress the BitMap Ends */
-					
+						
 					//size of bitmap
 					writeBitVINT( destBf, bitCnt );
 					//bitMap
@@ -411,7 +411,7 @@ void dbSNPCompression::compressSNPs(
 			bm.push_back(bitMap[i]);
 		
 		vector<bool> compressed_bm;
-		huffmanEncode(bm, compressed_bm, 5);
+		huffmanEncode(bm, compressed_bm, 6);
 		
 		cout << "Compressed from " << bitCnt << " to " << compressed_bm.size() << endl;
 		
@@ -628,10 +628,13 @@ void dbSNPCompression::compressDELs(
 			{				
 				//chromsome ID
 				writeString( destBf, prevChrID );
+				//cout << prevChrId << endl;
 				//operation type
 				writeBitVINT( destBf, DELETION );
+				//cout << DELETION << endl;
 				//size of positions
 				writeBitVINT( destBf, positions->size() );
+				//cout << positions->size() << endl;
 				//positions
 				vector<unsigned>::iterator posIter = positions->begin();
 				unsigned prevPos = 0;
@@ -660,6 +663,7 @@ void dbSNPCompression::compressDELs(
 			oldPos = 0;						
 		}
 		
+		//cout << newPos << " " << genToken << endl;
 		if( newPos > oldPos )
 		{
 			unsigned genLen = genToken.length()/2; //genLength					

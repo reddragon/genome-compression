@@ -80,6 +80,28 @@ void readBitGens( bit_file_c& bf, unsigned count, vector<char>* gens )
 }
 
 //read a VINT 
+
+unsigned readBitVINT( bit_file_c& bf )
+{
+	int cnt = 0, word_length = 5;
+	unsigned num = 0;
+	bool next_group;
+	bool next_bits[word_length-1];
+	do
+	{
+		next_group = bf.GetBit();
+		for(int i = 0; i < word_length - 1; i++)
+			next_bits[i] = bf.GetBit();
+		
+		for(int i = word_length-2; i >= 0; i--)
+			num |= (next_bits[i])<<(cnt++);
+		
+	} while(next_group);
+	return num;
+}
+
+
+/*
 unsigned readBitVINT( bit_file_c& bf )
 {
 	char b = (char)bf.GetBit();
@@ -102,13 +124,14 @@ unsigned readBitVINT( bit_file_c& bf )
 	      i |= (b & 0x7F) << shift;
 	}
 	return (unsigned)i;	
-}
+}*/
 
 //read a string
 string readString( bit_file_c& bf )
 {
 	 
-	int strSZ = bf.GetChar();	
+	char c = bf.GetChar();
+	int strSZ = c;	
 	
 	if( strSZ == EOF )
 		return "";		
