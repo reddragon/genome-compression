@@ -9,7 +9,7 @@ watsonFileGenerator::watsonFileGenerator(const string& SNPFile,
 void watsonFileGenerator::generate()
 {
 	string chromosome;
-	string pos;
+	string pos,end;
 	string ref_alt;
 	
 	//destion file with unified format
@@ -52,6 +52,7 @@ void watsonFileGenerator::generate()
 		token = strtok ( NULL, ","); //Start
 		pos = token;
 		token = strtok ( NULL, ","); //End
+		end = token;
 		token = strtok ( NULL, "," ); //Ref/Alt
 		ref_alt = token;	
 		
@@ -61,7 +62,7 @@ void watsonFileGenerator::generate()
 		if( ref_alt.find("-/") != string::npos )
 			destStream<<INSERTION<<","<<chromosome<<","<<pos<<","<<ref_alt<<endl;
 		else
-			destStream<<DELETION<<","<<chromosome<<","<<pos<<","<<ref_alt<<endl;
+			destStream<<DELETION<<","<<chromosome<<","<<end<<","<<ref_alt<<endl;
 		
 		prevChromosome = chromosome;
 		prevPos = pos;		

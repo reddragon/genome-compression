@@ -16,6 +16,7 @@
 #include "fileGenerator.h"
 #include <cstring>
 #include "bithuffman.h"
+#include "rle.h"
 
 using namespace std;
 

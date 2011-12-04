@@ -20,15 +20,17 @@ dbSNPCompression.o: dbSNPCompression.h
 
 dbSNPDeCompression.o: dbSNPDeCompression.h
 
+rle.o: rle.h
+
+bithuffman.o: bithuffman.h
+
 huffman.o: huffman.h
 
 bitfile.o: bitfile.h
 
-perftest.o: input.h output.h dbSNPCompression.h dbSNPDeCompression.h watsonFileGenerator.h kMerFreqGenerator.h 
+perftest.o: input.h output.h dbSNPCompression.h dbSNPDeCompression.h watsonFileGenerator.h kMerFreqGenerator.h rle.h
 
-bithuffman.o: bithuffman.h
-
-perftest: perftest.o bitfile.o bithuffman.o huffman.o input.o output.o dbSNPCompression.o dbSNPDeCompression.o kMerFreqGenerator.o watsonFileGenerator.o
+perftest: perftest.o bitfile.o huffman.o input.o output.o dbSNPCompression.o dbSNPDeCompression.o kMerFreqGenerator.o watsonFileGenerator.o rle.o
 
 clean:
 	@rm perftest *.o
