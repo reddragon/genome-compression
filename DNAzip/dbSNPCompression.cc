@@ -640,14 +640,17 @@ void dbSNPCompression::compressDELs(
 					}									
 					printf("Total deletions in %s: %d\n", prevChrID.c_str(), bitCnt);
 					bool* bitMap = new bool[bitCnt];								
+					
 					for( unsigned i = 0; i < bitCnt; i++ )					
 						bitMap[i] = false;					
+					
 					dbSNPCntStream.close();
 				
 					ifstream dbSNPStream( (dbSNPDir+prevChrID+".txt").c_str() );
 					getline( dbSNPStream, subLine ); //schema of dbSNP				
 					bitCnt = 0;
-						int countSNPDel = 0;
+					
+					int countSNPDel = 0;
 					printf("total size: %d\n", refPosGen->size());
 					while( getline( dbSNPStream, subLine ) )
 					{
@@ -686,61 +689,62 @@ void dbSNPCompression::compressDELs(
 		            vector<bool> bm;
 		            for(int i = 0; i < bitCnt; i++)
 			            bm.push_back(bitMap[i]);
-		
+					
+					
          		   	vector<bool> compressed_bm;
-            		huffmanEncode(bm, compressed_bm);
+            		huffmanEncode(bm, compressed_bm,7);
 		
             		cout << "del BitVector Compressed from " << bitCnt << " to " << compressed_bm.size() << endl;
 		
             		for(int i = 0; i < compressed_bm.size(); i++)
         				bitMap[i] = compressed_bm[i];
 		
-            		bitCnt = compressed_bm.size(); }
+            		bitCnt = compressed_bm.size(); 
+            	}
 
 					
-					dbSNPStream.close();
-					printf("found in SNP: %d\n", countSNPDel);
-					//chrID									
-					writeString( destBf, prevChrID);
-					//operation type
-					writeBitVINT( destBf, DELETION );
-					//size of bitmap
-					writeBitVINT( destBf, bitCnt );
-					//bitMap
-					writeBitArrays( destBf, bitMap, bitCnt );
-					/*string rlec = bitvec2compress(bitMap, bitCnt);
-					writeBitVINT(destBf, rlec.length());
-					writeString(destBf, rlec);*/
+				dbSNPStream.close();
+				printf("found in SNP: %d\n", countSNPDel);
+				//chrID									
+				writeString( destBf, prevChrID);
+				//operation type
+				writeBitVINT( destBf, DELETION );
+				//size of bitmap
+				writeBitVINT( destBf, bitCnt );
+				//bitMap
+				writeBitArrays( destBf, bitMap, bitCnt );
+				/*string rlec = bitvec2compress(bitMap, bitCnt);
+				writeBitVINT(destBf, rlec.length());
+				writeString(destBf, rlec);*/
 				
-					delete bitMap;				
+				delete bitMap;				
 				
-					//create a vector for other deletions
-					map<int, string>::iterator it;
-					int pos = 0;
-					printf("writing rest: %d\n", refPosGen->size());
-					for ( it=refPosGen->begin() ; it != refPosGen->end(); it++ )
-					{
-						writeBitVINT( destBf, (unsigned)(it->first - pos) );
-						pos = it->first;
-					}												
-					//size of other positions				
-					writeBitVINT( destBf, positions->size() );
-					//positions for other SNPs
-					for( it=refPosGen->begin(); it!= refPosGen->end(); it++)
-					
-					{					
-						writeBitVINT( destBf, it->second.length() );
-					}						
-					//gens
-					destBf.ByteAlign();															
+				//create a vector for other deletions
+				map<int, string>::iterator it;
+				int pos = 0;
+				printf("writing rest: %d\n", refPosGen->size());
+				for ( it=refPosGen->begin() ; it != refPosGen->end(); it++ )
+				{
+					writeBitVINT( destBf, (unsigned)(it->first - pos) );
+					pos = it->first;
+				}												
+				//size of other positions				
+				writeBitVINT( destBf, positions->size() );
+				//positions for other SNPs
+				for( it=refPosGen->begin(); it!= refPosGen->end(); it++)
+				{					
+					writeBitVINT( destBf, it->second.length() );
+				}						
+				//gens
+				destBf.ByteAlign();															
 												
-					positions->clear();
-					refPosGen->clear();
-				}
+				positions->clear();
+				refPosGen->clear();
+			  }
 				
 				prevChrID = newChrID;
 				prevPos = 0;							
-			}												
+		    }												
 			
 			// store the positions & gens into refPosGen & altPosGen
 			if( newPos > (int)prevPos )
@@ -802,19 +806,19 @@ void dbSNPCompression::compressDELs(
 		}
 
 	
-		            vector<bool> bm;
-		            for(int i = 0; i < bitCnt; i++)
-			            bm.push_back(bitMap[i]);
+		vector<bool> bm;
+		for(int i = 0; i < bitCnt; i++)
+			bm.push_back(bitMap[i]);
 		
-         		   	vector<bool> compressed_bm;
-            		huffmanEncode(bm, compressed_bm);
+        vector<bool> compressed_bm;
+        huffmanEncode(bm, compressed_bm);
 		
-            		cout << "del BitVector Compressed from " << bitCnt << " to " << compressed_bm.size() << endl;
+        cout << "del BitVector Compressed from " << bitCnt << " to " << compressed_bm.size() << endl;
 		
-            		for(int i = 0; i < compressed_bm.size(); i++)
-        				bitMap[i] = compressed_bm[i];
+        for(int i = 0; i < compressed_bm.size(); i++)
+			bitMap[i] = compressed_bm[i];
 		
-            		bitCnt = compressed_bm.size();
+        bitCnt = compressed_bm.size();
 
 		dbSNPStream.close();
 		
@@ -826,9 +830,9 @@ void dbSNPCompression::compressDELs(
 		writeBitVINT( destBf, bitCnt );
 		//bitMap
 		writeBitArrays( destBf, bitMap, bitCnt );		
-					/*string rlec = bitvec2compress(bitMap, bitCnt);
-					writeBitVINT(destBf, rlec.length());
-					writeString(destBf, rlec);*/
+		/*string rlec = bitvec2compress(bitMap, bitCnt);
+		writeBitVINT(destBf, rlec.length());
+		writeString(destBf, rlec);*/
 		delete bitMap;		
 		
 		//create a vector for other SNPs			
