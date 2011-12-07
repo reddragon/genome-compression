@@ -21,8 +21,6 @@
 \begin{document}
 
 \maketitle
-
-\clearpage
 .
 \clearpage
 
@@ -31,19 +29,39 @@
 \clearpage
 
 \section {Introduction}
-TODO
+Genomes are usually distributed in two formats. Firstly, using the FASTA format. Secondly, and more
+commonly as two files, one containing the SNPs (Single Nucleotide Polymorphisms), and the other containing
+insertions and deletions, both with respect to a reference genome (usually hg18 \cite{ucschg, ucschg18}).\\ 
+\\
+While the size of a pure FASTA-based genome is about 3 GB, using the second format as mentioned above, James Watson's genome was expressed in about 1.8 GB \cite{jwseq}, with reference to the hg18 genome. \\
+\\
+The DNAZip project \cite{dnazip} makes use of the database of all SNPs reported (dbSNP) and the hg18 genome to represent this information cleverly in about 4.1 MB. We intend to represent this information in an even more efficient format, and reduce the size of the genome further, without using any extra information.
 \clearpage
 
 \section {Relevant Work}
-TODO
+The following techniques are used by DNAzip to achieve compression.
+\begin{enumerate}
+
+\item Variable size integer representation and delta positions:\\
+In the variation data, all the variation (indels and SNPs) are expressed as position on the reference genome, plus the variation actually present. The position is expressed as an offset from the beginning of the sequence. Thus, the size required to store the position increases while storing variations at the end of the genome. Instead of storing the entire offset, it is sufficient to store just the delta from the previous variation. One problem with this is that an integer value takes the same amount of space to store, regardless of the value within it. 
+
+Thus, by implementing a mechanism to store exactly as many bits are required, storage utilized could be optimized. A variable integer as implemented by DNAzip uses 7 of 8 bits in a character to store the bits of the integer, and 1 bit to indicate whether an integer ends at that byte or not.\\
+
+\item{SNP mapping}\\
+Most of the variation between genomes are generally substitutions usually referred to as single nucleotide polymorphisms (SNPs). Most of these substitutions exist in one of two possible alternatives (bi-allele). Most of these SNPs are collected and organized by NCBI in what is known as dbSNP. dbSNP contains all known SNPs organized by position against the human reference genome (hg18, for instance). Though dbSNP records variations other than just the SNPs (it also records indels and multi-allele SNPs), DNAzip just considers the bi-allele SNPs. DNAzip stores the SNPs as a bit vector of all possible SNPs, with 1 where the SNP exists and 0 where the SNP doesn't. For those SNPs that are not present in dbSNP, they are stored as position along with the actual substitution.\\
+
+\item{K-mer partitioning}\\
+A common compression technique used is Huffman coding. By partitioning all the insertion data into K-mers and inserting them into a Huffman tree, the optimal representation of each k-mer can be obtain, and this representation is then stored, thus achieving some level of compression.\\
+\end{enumerate}
 \clearpage
 
 \section {Work Done}
 
 \subsection {Storing the Bit Vectors Efficiently}
-TODO and add charts
+As explained above, DNAZip creates a bitmap from the dbSNP. If bit i is set in the bitmap, it implies that the ith SNP from the dbSNP occurs in the actual genome. The DNAZip project simply stores this sparse bitmap for each chromosome. Upon analysis, we found that these bitmaps compose of about 1.2 MB of the total 4.1 MB of the genome. This sparseness of the bitmap made a strong case for compressing it.
 \begin{center}
 	\begin{tabular}{|p{1in}|p{1in}|}
+	\caption{Compression achieved for each chromosome}
 	\hline
 	Chromosome	&		\% Compression Achieved \\
 	\hline
@@ -96,17 +114,6 @@ M & 35.4922\\
 X & 49.1172\\
 	\hline
 Y & 80.8371\\
-
-
-
-
-
-
-
-
-
-
-
 
 	\hline
 	\end{tabular}
@@ -198,27 +205,6 @@ For deletions this number was significant but still not large enough. The percen
 \end{center}
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 We compressed the bit vector using Run-Length Encoding. This gave us a saving of about 10 KB. Using Huffman Encoding gave us a saving of roughly 20 KB. Another 1 KB of compression was squeezed in my noticing that the bit vector was sparser than the SNP bit vector, and a k-mer length of size 7 was the most suitable for this.\\ 
 \\
 Thus, we only changed the storage for the deletions. The deletions which were present in dbSNP were stored using bitvectors, and compressed using Huffman Encoding with k-mer size as 7.
@@ -230,6 +216,22 @@ The original DNAZip format was already pretty efficient. However, over the cours
 In all we have compressed James Watson's genome to 3736918 bytes, from the original 4198717 bytes used by the DNAZip format. This is a compression of roughly 10.998\%. \\
 
 TODO: Finish This
+\clearpage
+
+\section {Future Work}
+
+\begin{enumerate}
+\item 
+\item 
+
+\end{enumerate}
+
+It is possible to make the DNAZip utility more useful. A few of them are as follows:
+
+\begin{enumerate}
+\item Allowing compression and decompression on a chromosome-by-chromosome basis.
+\end{enumerate}
+
 \clearpage
 
 \begin{thebibliography}{}

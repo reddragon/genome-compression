@@ -282,7 +282,8 @@ void dbSNPCompression::compressSNPs(
 		
          		   	vector<bool> compressed_bm;
             		huffmanEncode(bm, compressed_bm);
-		
+					
+					cerr << prevChrID << " " << ((bitCnt - compressed_bm.size()) * 1.0 / (bitCnt)) * 100 << endl;
             		cout << "BitVector Compressed from " << bitCnt << " to " << compressed_bm.size() << endl;
 		
             		for(int i = 0; i < compressed_bm.size(); i++)
@@ -413,6 +414,7 @@ void dbSNPCompression::compressSNPs(
 		vector<bool> compressed_bm;
 		huffmanEncode(bm, compressed_bm, 6);
 		
+		cerr << prevChrID << " " << ((bitCnt - compressed_bm.size()) * 1.0 / (bitCnt)) * 100 << endl;    		
 		cout << "Compressed from " << bitCnt << " to " << compressed_bm.size() << endl;
 		
 		for(int i = 0; i < compressed_bm.size(); i++)
@@ -690,10 +692,12 @@ void dbSNPCompression::compressDELs(
 		            for(int i = 0; i < bitCnt; i++)
 			            bm.push_back(bitMap[i]);
 					
+					/*
 					cerr << bitCnt << endl;
 					for(int i = 0; i < bitCnt; i++)
 						cerr << (char)('0'+bitMap[i]);
-					
+					*/
+						
          		   	vector<bool> compressed_bm;
             		huffmanEncode(bm, compressed_bm,7);
 		
