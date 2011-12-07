@@ -329,66 +329,117 @@ void dbSNPDeCompression::deCompressDELs( bit_file_c& srcBf,
 		ofstream& destStream, 
 		const string& chromosomeID )
 {
-	string dataLine;
-	ifstream dataStream ( (dataDir+chromosomeID+".fa").c_str() );		
-	getline( dataStream, dataLine );   //original data file				
-	int genLetterCnt = 0;	
-	while( getline(dataStream, dataLine) )
-	{		
-		for( unsigned j = 0; j < dataLine.size(); j++ )
-	    {
-			refGen[genLetterCnt++] = dataLine[j];
-		}			
-	}
-	dataStream.close();
-	
-	vector<unsigned>* positions = new vector<unsigned>(); // positions
-	vector<unsigned>* lengths = new vector<unsigned>();   // lengths				
-	
-	//number of deletions
-	unsigned delCnt = readBitVINT( srcBf );
-	unsigned prevPos = 0;
-	for( unsigned i = 0; i < delCnt; i++ )
-	{
-		prevPos += readBitVINT( srcBf );			
-		positions->push_back( prevPos );			
-	}			
-	for( unsigned i = 0; i < delCnt; i++ )
-	{
-		unsigned length = readBitVINT( srcBf );
-		lengths->push_back( length );				
-	}							
+		std::map<int, string>* posGen = new map<int, string>();	 //pos & genLetter	
+		vector<int>* positions = new vector<int>(); //vector of positions								
+			
+		//a bitMap of common DELs				
+		unsigned bitExists = readBitVINT(srcBf);
+		bool *bitMap;
+		unsigned bitMapSz;
+
+		if(bitExists) {
+			bitMapSz = readBitVINT( srcBf );
+			bitMap = new bool[bitMapSz];
+			readBitArrays( srcBf, bitMap, bitMapSz );
 		
-	vector<unsigned>::iterator posIter = positions->begin();
-	vector<unsigned>::iterator lenIter = lengths->begin();
 		
-	while( posIter != positions->end() )
-	{
-		char* refStr = new char[(*lenIter)+1];
-		char* altStr = new char[(*lenIter)+1];
-		for( unsigned j = 0; j < (*lenIter); j++ )
-		{
-			refStr[j] = refGen[(*posIter)-1+j];
-			altStr[j] = '-';
+			/* Decoding the Huffman Encoding of the Bitvector */
+			vector<bool> encoded_str;
+			for(int i = 0; i < bitMapSz; i++)
+				encoded_str.push_back(bitMap[i]);
+			
+			vector<bool> decoded_str;
+			huffmanDecode(encoded_str, decoded_str, 7);
+			cout << "Decoded BitVector From " << bitMapSz << " to " << decoded_str.size() << endl;
+			
+			delete bitMap;
+			bitMapSz = decoded_str.size();
+			bitMap = new bool[bitMapSz];
+			for(int i = 0; i < bitMapSz; i++)
+				bitMap[i] = decoded_str[i];
+		
+			/* Decoding ends */	
+		}		
+		string dbSNPLine;
+		ifstream dbSNPStream( (dbSNPDir+chromosomeID+".txt").c_str() );
+		getline( dbSNPStream, dbSNPLine ); //schema of dbSNP
+		
+		string dataLine;
+		ifstream dataStream ( (dataDir+chromosomeID+".fa").c_str() );		
+		getline( dataStream, dataLine );   //original data file				
+		int genLetterCnt = 0;				
+		while( getline(dataStream, dataLine) )
+		{			
+			for( unsigned j = 0; j < dataLine.size(); j++ )
+			{
+				refGen[genLetterCnt++] = dataLine[j];
+			}			
 		}
-		refStr[(*lenIter)] = '\0';
-		altStr[(*lenIter)] = '\0';
-			
-		destStream << DELETION << "," << chromosomeID << "," << (*posIter) << ","<< refStr <<"/"<<altStr<<endl;
-		
-		delete refStr;
-		delete altStr;
-		
-		posIter++;
-		lenIter++;
-	}	
-		
-	srcBf.ByteAlign();
-			
-	delete positions;
-	delete lengths;	  	
+		dataStream.close();
+
+		if(bitExists)
+		{
+			int bitCnt = 0;
+			while( getline( dbSNPStream, dbSNPLine ) )
+			{
+				if( dbSNPLine.find("deletion") == string::npos )
+				continue;
 	
-	cout << "deCompressDELs" <<chromosomeID <<endl;
+				string observed;
+				
+				strtok( (char *)dbSNPLine.c_str(), "\t" ); //ID					
+				strtok( NULL, "\t" ); //chrNum					
+				strtok( NULL, "\t" ); //startPos
+				int dbSNPPos = atoi( strtok(NULL, "\t") ); //endPos
+				strtok( NULL, "\t"); //name
+				strtok( NULL, "\t"); //score
+				strtok( NULL, "\t"); //strand
+				observed = strtok( NULL, "\t"); //refNCBI
+				
+				if( bitMap[bitCnt++] )
+				{	
+					(*posGen)[dbSNPPos] = observed;			    
+				}
+		}
+		dbSNPStream.close();		
+		delete bitMap;			
+		}
+		//
+		//rare SNPs
+		//		
+		
+		unsigned rareSNPCnt = readBitVINT( srcBf );			
+		cout << "Received Count: "<<rareSNPCnt << endl;
+		unsigned prevPos = 0;
+		for( unsigned i = 0; i < rareSNPCnt; i++ )
+		{
+			unsigned diff = readBitVINT( srcBf );
+			positions->push_back( prevPos + diff );
+			prevPos = prevPos + diff;				
+		}
+		srcBf.ByteAlign();
+						
+		vector<int>::iterator posIter = positions->begin();
+		while( posIter != positions->end() )
+		{
+				unsigned length = readBitVINT (srcBf);
+				//cout << refGen[0] << " " << *posIter << " "<< length << "\n";
+			    (*posGen)[*posIter] = string( refGen + *posIter - length, length);
+				posIter++;
+		}
+			
+		map<int, string>::iterator it;			
+		for ( it=posGen->begin(); it != posGen->end(); it++ )
+		{
+			destStream <<DELETION<<","<<chromosomeID <<","<< it->first <<","<< it->second <<"/"<< string(it->second.length(), '-') << endl;				
+		}	
+						
+		delete posGen;
+		delete positions;			
+		
+		cout << "deCompressDELs" <<chromosomeID <<endl;
+
+
 }
 
 void dbSNPDeCompression::deCompress( const string& srcFile, 
