@@ -142,7 +142,7 @@ The values being written as VINTs during the compression process were written to
 \caption{VINT Word Length v/s Space Consumed (KB)}\label{fig:fs}
 \end{figure}
 \clearpage
-Thus, with the VINT word size as 882 KB of space was being used up for writing VINTs. The optimal VINT word size was found to be 5, which as per experiments would have used up 756 KB of space.\\
+Thus, with the VINT word size as 8, 2574 KB of space was being used up for writing VINTs. The optimal VINT word size was found to be 5, which as per experiments would have used up 2448 KB of space.\\
 \\ 
 The actual compression received from this was 129 KB roughly, which was in line with our expectation before this experiment.\\
 \clearpage
@@ -166,11 +166,11 @@ Thus, we only changed the storage for the deletions. The deletions which were pr
 	\hline
 	Chromosome	&		\% of Deletions found in dbSNP \\
 	\hline
-	1	&		8.54 \\
+	1	&	8.54 \\
 	\hline
-	2	&		8.76 \\
+	2	&	8.76 \\
 	\hline
-	3	&		8.80 \\
+	3	&	8.80 \\
 	\hline
 	4	&	11.67 \\
 	\hline
@@ -231,7 +231,12 @@ the substituted characters as bits to the file. We tried compressing this string
 with different k-mer sizes but the bit-string was random enough not to yield 
 any decrease in the compression.
 
-\item We tried to write 
+\item Further in our efforts to improve the encoding of SNPs which were not present
+in dbSNP, we tried storing all the substitute characters in order of the character they
+replace. However, now this increased the delta values, this did not give a better 
+compression. Efforts to tweak the VINT storage did not help either.
+
+\item
 
 \end{enumerate}
 
@@ -241,6 +246,12 @@ any decrease in the compression.
 The original DNAZip format was already pretty efficient. However, over the course of project, we have exploited avenues where we could foresee significant compression possible. Towards the end of the project, it became hard to find any further improvements.\\
 \\
 In all we have compressed James Watson's genome to 3736918 bytes, from the original 4198717 bytes used by the DNAZip format. This is a compression of roughly 10.998\%. \\
+\\
+With increase in the size of dbSNP, we expect the compression to become better
+with time, since majority of the file size, roughly 2 MB out of the current 
+3.56 MB is in deltas used for encoding SNPs absent from dbSNP. With time
+this number is expected to go down, and the bit-vector size to increase. Also,
+the bit-vector gets sparser and the compression is expected to work better.
 \\
 The source code including our modifications is available at: \\
 http://www.github.com/reddragon/DNAzip\\
@@ -259,7 +270,10 @@ bit-vectors, VINT data, and then trying out all possible choices and making the
 best possible choice. However, as apparent, it would be roughly more than 2x slower
 than the current DNAzip build with our code.
 
-\item 
+\item Of the 2574 KB occupied by VINT storage, roughly 2 MB is used by Deltas stored
+while encoding SNPs. Using a different VINT storage as discussed earlier we saved about
+129 KB. However, we think there should be further scope in furhter optimizing the
+VINT storage. 
 
 \end{enumerate}
 
