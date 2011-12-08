@@ -59,8 +59,11 @@ A common compression technique used is Huffman coding. By partitioning all the i
 
 \subsection {Storing the Bit Vectors Efficiently}
 As explained above, DNAZip creates a bitmap from the dbSNP. If bit i is set in the bitmap, it implies that the ith SNP from the dbSNP occurs in the actual genome. The DNAZip project simply stores this sparse bitmap for each chromosome. Upon analysis, we found that these bitmaps compose of about 1.2 MB of the total 4.1 MB of the genome. This sparseness of the bitmap made a strong case for compressing it.
-\begin{center}
+
+Compressing the bit-vectors using Huffman Encoding with k-mers of size 5 resulted in the genome being of size 3896467 bytes. While using k-mers of size 6 resulted in the genome being of size 3889100 bytes. This is against the original file of size 4198717 bytes. Thus, using k-mers of size 6, we decreased the size of the genome by 302.36 KB, which is a space-saving of 7.37\%.\\
+
 \begin{table}
+\begin{center}
 	\begin{tabular}{|p{1in}|p{1in}|}
 
 	\hline
@@ -118,9 +121,11 @@ Y & 80.8371\\
 
 	\hline
 	\end{tabular}
-	\caption{Compression achieved for each chromosome}
-\end{table}
 \end{center}
+	\caption{Compression achieved for each chromosome}
+
+\end{table}
+
 
 
 \clearpage
@@ -137,20 +142,25 @@ The values being written as VINTs during the compression process were written to
 \caption{VINT Word Length v/s Space Consumed (KB)}\label{fig:fs}
 \end{figure}
 \clearpage
-Thus, with the VINT word size as 8, 882 KB of space was being used up for writing VINTs. The optimal VINT word size was found to be 5, which as per experiments would have used up 756 KB of space.\\
+Thus, with the VINT word size as 882 KB of space was being used up for writing VINTs. The optimal VINT word size was found to be 5, which as per experiments would have used up 756 KB of space.\\
 \\ 
 The actual compression received from this was 129 KB roughly, which was in line with our expectation before this experiment.\\
 \clearpage
 
-\subsection {Improving the storing of Insertion/Deletion (INDEL)}
+\subsection {Improving the storage of Insertions/Deletions (INDELs)}
 After thorough analysis, we realized that the Insertion/Deletion format in iteself was pretty packed. One optimization possible was to create a Bit Vector for the Insertions and Deletions which were present in dbSNP. This meant that we would not need to store the information for the insertions and deletions which existed in the dbSNP. A bit vector for the insertions / deletions present in dbSNP could be used to encode that information.\\ 
 \\
 For insertions we noticed that the number of insertions in the Genome which existed in dbSNP were very few. Thus, the bit vector was extremely sparse. (TODO write figures?) \\
 \\
-For deletions this number was significant but still not large enough. The percentage of deletions in a chromosome which existin dbSNP varies from 5.3\% to 11.68\% (apart from the Mitochondrial DNA, which has only deletion, which does not exist in dbSNP).
+For deletions this number was significant but still not large enough. The percentage of deletions in a chromosome which existin dbSNP varies from 5.3\% to 11.68\% (apart from the Mitochondrial DNA, which has only deletion, which does not exist in dbSNP).\\
+\\
+We compressed the bit vector using Run-Length Encoding. This gave us a saving of about 10 KB. Using Huffman Encoding gave us a saving of roughly 20 KB. Another 1 KB of compression was squeezed in my noticing that the bit vector was sparser than the SNP bit vector, and a k-mer length of size 7 was the most suitable for this.\\ 
+\\
+Thus, we only changed the storage for the deletions. The deletions which were present in dbSNP were stored using bitvectors, and compressed using Huffman Encoding with k-mer size as 7.
 
+\begin{table}[h]
 \begin{center}
-  \begin{table}[h]
+
   	\begin{tabular}{|p{1in}|p{1in}|}
 	
 	\hline
@@ -205,28 +215,50 @@ For deletions this number was significant but still not large enough. The percen
 	X	&	7.57 \\
 	\hline
 	\end{tabular}
+\end{center}
   \caption {Percentage of Deletions in each chromosome found in dbSNP}
   \end{table}
-\end{center}
 
 
-We compressed the bit vector using Run-Length Encoding. This gave us a saving of about 10 KB. Using Huffman Encoding gave us a saving of roughly 20 KB. Another 1 KB of compression was squeezed in my noticing that the bit vector was sparser than the SNP bit vector, and a k-mer length of size 7 was the most suitable for this.\\ 
-\\
-Thus, we only changed the storage for the deletions. The deletions which were present in dbSNP were stored using bitvectors, and compressed using Huffman Encoding with k-mer size as 7.
+\clearpage
+
+\subsection {Miscellaneous Experiments}
+
+\begin{enumerate}
+
+\item For SNPs which are not present in dbSNP, DNAZip writes the substituted and
+the substituted characters as bits to the file. We tried compressing this string
+with different k-mer sizes but the bit-string was random enough not to yield 
+any decrease in the compression.
+
+\item We tried to write 
+
+\end{enumerate}
+
 \clearpage
 
 \section {Results \& Conclusion}
 The original DNAZip format was already pretty efficient. However, over the course of project, we have exploited avenues where we could foresee significant compression possible. Towards the end of the project, it became hard to find any further improvements.\\
 \\
 In all we have compressed James Watson's genome to 3736918 bytes, from the original 4198717 bytes used by the DNAZip format. This is a compression of roughly 10.998\%. \\
-
+\\
+The source code including our modifications is available at: \\
+http://www.github.com/reddragon/DNAzip\\
+\\
 TODO: Finish This
 \clearpage
 
-\section {Future Work}
+\section {Further Work}
 
 \begin{enumerate}
-\item 
+\item After experimentation we have made certain choices, such as the k-mer size
+for compressing the SNP bitvectors. While we expect other genomes to have similar
+data and our choices to be relevant, but we can optimize this at the cost of
+performance. Doing one pass to figure out the data to be written, such as the 
+bit-vectors, VINT data, and then trying out all possible choices and making the
+best possible choice. However, as apparent, it would be roughly more than 2x slower
+than the current DNAzip build with our code.
+
 \item 
 
 \end{enumerate}
