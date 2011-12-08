@@ -60,8 +60,9 @@ A common compression technique used is Huffman coding. By partitioning all the i
 \subsection {Storing the Bit Vectors Efficiently}
 As explained above, DNAZip creates a bitmap from the dbSNP. If bit i is set in the bitmap, it implies that the ith SNP from the dbSNP occurs in the actual genome. The DNAZip project simply stores this sparse bitmap for each chromosome. Upon analysis, we found that these bitmaps compose of about 1.2 MB of the total 4.1 MB of the genome. This sparseness of the bitmap made a strong case for compressing it.
 \begin{center}
+\begin{table}
 	\begin{tabular}{|p{1in}|p{1in}|}
-	\caption{Compression achieved for each chromosome}
+
 	\hline
 	Chromosome	&		\% Compression Achieved \\
 	\hline
@@ -117,7 +118,8 @@ Y & 80.8371\\
 
 	\hline
 	\end{tabular}
-
+	\caption{Compression achieved for each chromosome}
+\end{table}
 \end{center}
 
 
@@ -148,8 +150,9 @@ For insertions we noticed that the number of insertions in the Genome which exis
 For deletions this number was significant but still not large enough. The percentage of deletions in a chromosome which existin dbSNP varies from 5.3\% to 11.68\% (apart from the Mitochondrial DNA, which has only deletion, which does not exist in dbSNP).
 
 \begin{center}
-	\begin{tabular}{|p{1in}|p{1in}|}
-	\caption {Percentage of Deletions in each chromosome found in dbSNP}
+  \begin{table}[h]
+  	\begin{tabular}{|p{1in}|p{1in}|}
+	
 	\hline
 	Chromosome	&		\% of Deletions found in dbSNP \\
 	\hline
@@ -202,7 +205,8 @@ For deletions this number was significant but still not large enough. The percen
 	X	&	7.57 \\
 	\hline
 	\end{tabular}
-
+  \caption {Percentage of Deletions in each chromosome found in dbSNP}
+  \end{table}
 \end{center}
 
 
