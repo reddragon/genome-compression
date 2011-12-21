@@ -10,7 +10,7 @@
 \linespread{1.4}
 
 \title{Genome Compression Against a Reference \\
-        Project Proposal \\}
+        Final Report \\}
 
 \author{\\
         Aniruddha Laud (107635282)\\
@@ -150,14 +150,13 @@ The actual compression received from this was 129 KB roughly, which was in line 
 \subsection {Improving the storage of Insertions/Deletions (INDELs)}
 After thorough analysis, we realized that the Insertion/Deletion format in iteself was pretty packed. One optimization possible was to create a Bit Vector for the Insertions and Deletions which were present in dbSNP. This meant that we would not need to store the information for the insertions and deletions which existed in the dbSNP. A bit vector for the insertions / deletions present in dbSNP could be used to encode that information.\\ 
 \\
-For insertions we noticed that the number of insertions in the Genome which existed in dbSNP were very few. Thus, the bit vector was extremely sparse. (TODO write figures?) \\
+The number of deletions in the genome which also existed in dbSNP, was significant but not large enough (Refer Table 2). The percentage of deletions in a chromosome which exist in dbSNP varies from 5.3\% to 11.68\% (apart from the Mitochondrial DNA, which has only one deletion, which does not exist in dbSNP).\\
 \\
-For deletions this number was significant but still not large enough. The percentage of deletions in a chromosome which existin dbSNP varies from 5.3\% to 11.68\% (apart from the Mitochondrial DNA, which has only deletion, which does not exist in dbSNP).\\
+We compressed the bit vector using Run-Length Encoding. This gave us a saving of about 10 KB. Using Huffman Encoding gave us a saving of roughly 20 KB. Another 1 KB of compression was squeezed in by noticing that the bit vector was sparser than the SNP bit vector, and a k-mer length of size 7 was the most suitable for this.\\ 
 \\
-We compressed the bit vector using Run-Length Encoding. This gave us a saving of about 10 KB. Using Huffman Encoding gave us a saving of roughly 20 KB. Another 1 KB of compression was squeezed in my noticing that the bit vector was sparser than the SNP bit vector, and a k-mer length of size 7 was the most suitable for this.\\ 
+Thus, we only changed the storage for the deletions. The deletions which were present in dbSNP were stored using bitvectors, and compressed using Huffman Encoding with k-mer size as 7.\\
 \\
-Thus, we only changed the storage for the deletions. The deletions which were present in dbSNP were stored using bitvectors, and compressed using Huffman Encoding with k-mer size as 7.
-
+For insertions we noticed that the number of insertions in the Genome which existed in dbSNP were very few. Thus, the bit vector was extremely sparse. And hence, there was not much benefit of encoding them as bit-vectors.
 \begin{table}[h]
 \begin{center}
 
@@ -236,7 +235,6 @@ in dbSNP, we tried storing all the substitute characters in order of the charact
 replace. However, now this increased the delta values, this did not give a better 
 compression. Efforts to tweak the VINT storage did not help either.
 
-\item
 
 \end{enumerate}
 
@@ -245,18 +243,14 @@ compression. Efforts to tweak the VINT storage did not help either.
 \section {Results \& Conclusion}
 The original DNAZip format was already pretty efficient. However, over the course of project, we have exploited avenues where we could foresee significant compression possible. Towards the end of the project, it became hard to find any further improvements.\\
 \\
-In all we have compressed James Watson's genome to 3736918 bytes, from the original 4198717 bytes used by the DNAZip format. This is a compression of roughly 10.998\%. \\
+In all we have compressed James Watson's genome to \textbf{3736918} bytes, from the original 4198717 bytes used by the DNAZip format. This is a compression of roughly \textbf{10.998\%}. \\
 \\
 With increase in the size of dbSNP, we expect the compression to become better
 with time, since majority of the file size, roughly 2 MB out of the current 
 3.56 MB is in deltas used for encoding SNPs absent from dbSNP. With time
 this number is expected to go down, and the bit-vector size to increase. Also,
-the bit-vector gets sparser and the compression is expected to work better.
+the bit-vector gets sparser and the compression is expected to work better.\\
 \\
-The source code including our modifications is available at: \\
-http://www.github.com/reddragon/DNAzip\\
-\\
-TODO: Finish This
 \clearpage
 
 \section {Further Work}
@@ -272,7 +266,7 @@ than the current DNAzip build with our code.
 
 \item Of the 2574 KB occupied by VINT storage, roughly 2 MB is used by Deltas stored
 while encoding SNPs. Using a different VINT storage as discussed earlier we saved about
-129 KB. However, we think there should be further scope in furhter optimizing the
+129 KB. However, we think there should be scope of further optimizing the
 VINT storage. 
 
 \end{enumerate}
@@ -281,6 +275,10 @@ It is possible to make the DNAZip utility more useful. A few of them are as foll
 
 \begin{enumerate}
 \item Allowing compression and decompression on a chromosome-by-chromosome basis.
+
+\item There is scope for constant-factor improvement in DNAzip's performance, this
+could be done by using C-style data structures instead of the C++ STL data structures
+being used.
 \end{enumerate}
 
 \clearpage
